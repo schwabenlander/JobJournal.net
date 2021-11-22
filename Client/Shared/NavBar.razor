@@ -29,32 +29,23 @@
 						<li class="nav-item">
 							<a class="nav-link" href="#">Applications</a>
 						</li>
-						<li class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">@context.User.Identity?.Name</a>
-							<ul class="dropdown-menu" aria-labelledby="dropdown01">
-								<li><a class="dropdown-item" href="#" @onclick="@BeginLogout" @onclick:preventDefault >Sign out</a></li>
-							</ul>
-						</li>
 					</ul>
 
-					<form class="d-flex">
-						<input
-							class="form-control me-2"
-							type="search"
-							placeholder="Search"
-							aria-label="Search"
-						/>
-						<button class="btn btn-outline-white" type="submit">
-							<i class="bi bi-search"></i>
+					<div class="dropdown">
+						<button class="btn btn-outline-white dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="bi bi-person-fill"></i> @context.User.Identity?.Name
 						</button>
-					</form>
+						<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+							<li><a class="dropdown-item" href="#" @onclick="@BeginLogout" @onclick:preventDefault >Sign out</a></li>
+						</ul>
+					</div>
 				</div>
 			</Authorized>
 			<NotAuthorized>
 				<div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
-					<ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+					<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 						<li>
-							<a href="authentication/login" class="nav-link">Sign in</a>
+							<button class="btn btn-outline-white" @onclick="NavigateToLogin">Sign in</button>
 						</li>
 					</ul>
 				</div>
@@ -64,9 +55,14 @@
 </nav>
 
 @code{
-    private async Task BeginLogout(MouseEventArgs args)
-    {
-        await SignOutManager.SetSignOutState();
-        Navigation.NavigateTo("authentication/logout");
-    }
+	private async Task BeginLogout(MouseEventArgs args)
+	{
+		await SignOutManager.SetSignOutState();
+		Navigation.NavigateTo("authentication/logout");
+	}
+
+	private void NavigateToLogin(MouseEventArgs args)
+	{
+		Navigation.NavigateTo("authentication/login");
+	}
 }
