@@ -6,7 +6,7 @@
 
 <nav
 	class="navbar navbar-expand-lg fixed-top navbar-dark bg-blue shadow-sm"	aria-label="Main navigation">
-	<div class="container-fluid">
+	<div class="container">
 		<a class="navbar-brand" href="#"	><i class="bi bi-book-half"></i> <strong>JobJournal</strong></a>
 		<button
 			class="navbar-toggler p-0 border-0"
@@ -33,7 +33,7 @@
 
 					<div class="dropdown">
 						<button class="btn btn-outline-white dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-							<i class="bi bi-person-fill"></i> @context.User.Identity?.Name
+							<i class="bi bi-person-circle"></i> @context.User.Identity?.Name
 						</button>
 						<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
 							<li><a class="dropdown-item" href="#" @onclick="@BeginLogout" @onclick:preventDefault >Sign out</a></li>
