@@ -2,15 +2,10 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 
-<PageTitle>Index</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
 <AuthorizeView>
     <Authorized>
-        <h2 class="mb-4">Hello, @context.User.Identity.Name!</h2>
+        <PageTitle>@context.User.Identity?.Name's JobJournal</PageTitle>
+        <h2 class="mb-4">Hello, @context.User.Identity?.Name!</h2>
 
         <table class="table">
             <thead>
@@ -30,6 +25,12 @@ Welcome to your new app.
             </tbody>
         </table>
     </Authorized>
+    <NotAuthorized>
+        <PageTitle>JobJournal</PageTitle>
+        <h1>Welcome to JobJournal!</h1>
+
+        Please sign in.
+    </NotAuthorized>
 </AuthorizeView>
 
 @code {
