@@ -4,16 +4,7 @@
 <NavBar />
 
 <main class="container">
-	<AuthorizeView>
-		<Authorized>
-			<form class="d-flex">
-				<div class="input-group mt-4 mb-2">
-					<input type="text" class="form-control" placeholder="Search..." aria-label="Search">
-					<button class="btn btn-outline-secondary" type="button" id="searchbutton"><i class="bi bi-search"></i></button>
-				</div>
-			</form>
-		</Authorized>
-	</AuthorizeView>
+	<SearchBox />
 	<div class="my-3 p-3 bg-white rounded shadow-sm">
 		<!-- Conent goes here-->
 		@Body

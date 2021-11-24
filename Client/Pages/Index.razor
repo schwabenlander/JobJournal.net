@@ -5,7 +5,7 @@
 <AuthorizeView>
     <Authorized>
         <PageTitle>@context.User.Identity?.Name's JobJournal</PageTitle>
-        <h2 class="mb-4">Hello, @context.User.Identity?.Name!</h2>
+        <h1 class="mb-4">Hello, @context.User.Identity?.Name!</h1>
 
         <table class="table">
             <thead>
@@ -39,8 +39,5 @@
 
     private ClaimsPrincipal claimsPrincipal { get; set; }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        claimsPrincipal = (await authState).User;
-    }
+    protected override async Task OnParametersSetAsync() => claimsPrincipal = (await authState).User;
 }
