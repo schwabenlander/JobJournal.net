@@ -1,0 +1,144 @@
+﻿@inject NavigationManager NavigationManager
+
+@if (JobApplication != null)
+{
+    <EditJobApplicationDialog @ref="EditModal" JobApplication="JobApplication" OnEditJobApplicationSaved="JobApplicationUpdated" />
+    <DeleteJobApplicationDialog @ref="DeleteModal" JobApplication="JobApplication" OnJobApplicationDeleted="JobApplicationDeleted" />
+
+    <h1>@JobApplication.JobTitle</h1>
+    <h3><a href="/company/@JobApplication.CompanyId">@JobApplication.CompanyName</a></h3>
+
+    <button type="button" class="btn btn-secondary" onclick="javascript:history.go(-1)">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+    <button class="btn btn-primary" @onclick="Update"><i class="fas fa-pencil-alt"></i> Edit</button>
+    <button class="btn btn-danger" @onclick="Delete"><i class="fas fa-trash-alt"></i> Delete</button>
+
+    <hr />
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Application Date:</strong>
+            </div>
+            <div class="col-lg-10">
+                @JobApplication.ApplicationDate.ToShortDateString()
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Method:</strong>
+            </div>
+            <div class="col-lg-10">
+                @JobApplication.ApplicationMethod
+            </div>
+        </div>
+
+        @if (JobApplication.ApplicationMethodId == 9)
+        {
+            <div class="row">
+                <div class="col-lg-2">
+                    <strong>Method (Other):</strong>
+                </div>
+                <div class="col-lg-10">
+                    @if (string.IsNullOrEmpty(JobApplication.OtherApplicationMethod))
+                    {
+                        <text>N/A</text>
+                    }
+                    else
+                    {
+                        @JobApplication.OtherApplicationMethod
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Status:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (JobApplication.ApplicationStatusId == 5)
+                {
+                    <i class="fas fa-ghost"></i>
+                }
+                @JobApplication.ApplicationStatus
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Notes:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (string.IsNullOrEmpty(JobApplication.Notes))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    @JobApplication.Notes
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <LoadingIndicator />
+}
+
+@code {
+    [Inject]
+    public IJobApplicationDataService JobApplicationDataService { get; set; }
+
+    private Guid UserId { get; set; }
+
+    [Parameter]
+    public Guid JobApplicationId { get; set; }
+
+    JobApplicationDTO JobApplication { get; set; }
+
+    EditJobApplicationDialog EditModal { get; set; }
+    DeleteJobApplicationDialog DeleteModal { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await GetJobApplication();
+    }
+
+    protected async Task GetJobApplication()
+    {
+        JobApplication = await JobApplicationDataService.GetJobApplicationAsync(JobApplicationId);
+    }
+
+    protected void Update()
+    {
+        Console.WriteLine($"Updating job application: {JobApplication.JobTitle}");
+        EditModal.Show();
+    }
+
+    protected void Delete()
+    {
+        Console.WriteLine($"Deleting job application: {JobApplication.JobTitle}");
+        DeleteModal.Show();
+    }
+
+    public async Task JobApplicationUpdated(JobApplicationDTO jobApplication)
+    {
+        Console.WriteLine($"{jobApplication.JobTitle} was updated in the database");
+        await GetJobApplication();
+    }
+
+    public void JobApplicationDeleted(JobApplicationDTO jobApplication)
+    {
+        Console.WriteLine($"{jobApplication.JobTitle} was removed from the database");
+        NavigateBackToApplications();
+    }
+
+    protected void NavigateBackToApplications()
+    {
+        NavigationManager.NavigateTo($"/company/{JobApplication.CompanyId}/jobapplication/all");
+    }
+}

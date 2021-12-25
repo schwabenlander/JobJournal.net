@@ -1,0 +1,103 @@
+﻿<ModalDialog @ref="Modal" ModalTitle="Add a Contact">
+    <ModalContent>
+        <EditForm Model="Contact" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label for="fullName"><span class="text-danger">*</span> Full Name: </label>
+                <InputText id="fullName" class="form-control" @bind-Value="@Contact.FullName" placeholder="Full Name"></InputText>
+                <ValidationMessage For="@(() => Contact.FullName)" />
+            </div>
+
+            <div class="form-group">
+                <label for="jobTitle"><span class="text-danger">*</span> Job Title: </label>
+                <InputText id="jobTitle" class="form-control" @bind-Value="@Contact.JobTitle" placeholder="Job Title"></InputText>
+                <ValidationMessage For="@(() => Contact.JobTitle)" />
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number: </label>
+                <InputText id="phoneNumber" class="form-control" @bind-Value="@Contact.PhoneNumber" type="tel" placeholder="(123) 456-7890"></InputText>
+                <ValidationMessage For="@(() => Contact.PhoneNumber)" />
+            </div>
+
+            <div class="form-group">
+                <label for="emailAddress">Email Address: </label>
+                <InputText id="emailAddress" class="form-control" @bind-Value="@Contact.EmailAddress" type="email" placeholder="user@company.com"></InputText>
+                <ValidationMessage For="@(() => Contact.EmailAddress)" />
+            </div>
+
+            <div class="form-group">
+                <label for="firstContactDate">First Contact Date: </label>
+                <InputDate id="firstContactDate" class="form-control" @bind-Value="@Contact.FirstContactDate" type="date"></InputDate>
+                <ValidationMessage For="@(() => Contact.FirstContactDate)" />
+            </div>
+
+            <div class="form-group">
+                <label for="mostRecentContactDate">Most Recent Contact Date: </label>
+                <InputDate id="mostRecentContactDate" class="form-control" @bind-Value="@Contact.MostRecentContactDate" type="date"></InputDate>
+                <ValidationMessage For="@(() => Contact.MostRecentContactDate)" />
+            </div>
+
+            <div class="form-group">
+                <label for="Notes">Notes: </label>
+                <InputTextArea id="Notes" class="form-control" @bind-Value="@Contact.Notes" placeholder="Notes"></InputTextArea>
+                <ValidationMessage For="@(() => Contact.Notes)" />
+            </div>
+
+            <div class="alert alert-secondary" role="alert">
+                <span class="text-danger">*</span> Indicates required field
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="Hide">Cancel</button>
+            </div>
+        </EditForm>
+    </ModalContent>
+</ModalDialog>
+
+@code {
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+
+    [Parameter]
+    public Guid CompanyId { get; set; }
+
+    [Parameter]
+    public EventCallback<CompanyContactDTO> OnNewContactSaved { get; set; }
+
+    [Inject]
+    public ICompanyContactDataService ContactDataService { get; set; }
+
+    public CompanyContactDTO Contact { get; set; } = new CompanyContactDTO();
+
+    public ModalDialog Modal { get; set; }
+
+    public void ResetDialog()
+    {
+        Contact = new CompanyContactDTO();
+    }
+
+    public async Task HandleValidSubmit()
+    {
+        Contact.UserId = UserId;
+        Contact.CompanyId = CompanyId;
+
+        await ContactDataService.AddCompanyContactAsync(Contact);
+        await Hide();
+
+        await OnNewContactSaved.InvokeAsync(Contact);
+        ResetDialog();
+    }
+
+    public async Task Hide()
+    {
+        await Modal.Hide();
+    }
+
+    public void Show()
+    {
+        Modal.Show();
+    }
+}

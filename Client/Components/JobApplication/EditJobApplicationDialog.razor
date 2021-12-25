@@ -1,0 +1,116 @@
+﻿<ModalDialog @ref="Modal" ModalTitle="Edit Job Application">
+    <ModalContent>
+        <EditForm Model="JobApplication" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label for="jobTitle"><span class="text-danger">*</span> Job Title: </label>
+                <InputText id="jobTitle" class="form-control" @bind-Value="JobApplication.JobTitle" placeholder="Job Title"></InputText>
+                <ValidationMessage For="@(() => JobApplication.JobTitle)" />
+            </div>
+
+            <div class="form-group">
+                <label for="applicationDate"><span class="text-danger">*</span> Date of Application: </label>
+                <InputDate id="applicationDate" class="form-control" @bind-Value="JobApplication.ApplicationDate"></InputDate>
+                <ValidationMessage For="@(() => JobApplication.ApplicationDate)" />
+            </div>
+
+            <div class="form-group">
+                <label for="methodId"><span class="text-danger">*</span> Method: </label>
+                <InputSelectNumber id="methodId" class="form-control" @bind-Value="JobApplication.ApplicationMethodId">
+                    @foreach (var method in ApplicationMethods)
+                    {
+                        <option value="@method.Id">@method.Method</option>
+                    }
+                </InputSelectNumber>
+                <ValidationMessage For="@(() => JobApplication.ApplicationMethodId)" />
+            </div>
+
+            @if (JobApplication.ApplicationMethodId == 9)
+            {
+                <div class="form-group">
+                    <label for="otherMethod"><span class="text-danger">*</span>  Method (Other): </label>
+                    <InputText id="otherMethod" class="form-control" @bind-Value="JobApplication.OtherApplicationMethod" placeholder="Please specify"></InputText>
+                    <ValidationMessage For="@(() => JobApplication.OtherApplicationMethod)" />
+                </div>
+            }
+
+            <div class="form-group">
+                <label for="statusId"><span class="text-danger">*</span> Status: </label>
+                <InputSelectNumber id="statusId" class="form-control" @bind-Value="JobApplication.ApplicationStatusId">
+                    @foreach (var status in ApplicationStatuses)
+                    {
+                        <option value="@status.Id">@status.Status</option>
+                    }
+                </InputSelectNumber>
+                <ValidationMessage For="@(() => JobApplication.ApplicationStatusId)" />
+            </div>
+
+            <div class="form-group">
+                <label for="Notes">Notes: </label>
+                <InputTextArea id="Notes" class="form-control" @bind-Value="JobApplication.Notes" placeholder="Notes"></InputTextArea>
+                <ValidationMessage For="@(() => JobApplication.Notes)" />
+            </div>
+
+            <div class="alert alert-secondary" role="alert">
+                <span class="text-danger">*</span> Indicates required field
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="Hide">Cancel</button>
+            </div>
+        </EditForm>
+    </ModalContent>
+</ModalDialog>
+
+@code {
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+
+    [Parameter]
+    public EventCallback<JobApplicationDTO> OnEditJobApplicationSaved { get; set; }
+
+    [Inject]
+    public IJobApplicationDataService JobApplicationDataService { get; set; }
+
+    List<ApplicationStatusDTO> ApplicationStatuses { get; set; } = new List<ApplicationStatusDTO>();
+
+    List<ApplicationMethodDTO> ApplicationMethods { get; set; } = new List<ApplicationMethodDTO>();
+
+    [Parameter]
+    public JobApplicationDTO JobApplication { get; set; } = new JobApplicationDTO();
+
+    public ModalDialog Modal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApplicationMethods = (await JobApplicationDataService.GetApplicationMethodsAsync()).ToList();
+        ApplicationStatuses = (await JobApplicationDataService.GetApplicationStatusesAsync()).ToList();
+    }
+
+    public void ResetDialog()
+    {
+        JobApplication = new JobApplicationDTO();
+    }
+
+    public async Task HandleValidSubmit()
+    {
+        JobApplication.UserId = UserId;
+
+        await JobApplicationDataService.UpdateJobApplicationAsync(JobApplication);
+        await Hide();
+
+        await OnEditJobApplicationSaved.InvokeAsync(JobApplication);
+    }
+
+    public async Task Hide()
+    {
+        await Modal.Hide();
+    }
+
+    public void Show()
+    {
+        Modal.Show();
+    }
+}

@@ -1,0 +1,106 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject ICompanyDataService CompanyDataService
+@inject ICompanyContactDataService CompanyContactDataService
+@inject NavigationManager NavigationManager
+
+<AddContactDialog @ref="AddContactModal" CompanyId="CompanyId" OnNewContactSaved="GetCompanyContactsAsync" />
+
+@if (Company != null && Contacts != null)
+{
+    <h1><a href="/company/@Company.Id">@Company.CompanyName</a> Contacts</h1>
+
+    <div style="padding-bottom: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="javascript:history.go(-1)">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+
+        <button type="button" class="btn btn-primary" @onclick="ShowContactDialog">
+            <i class="fas fa-plus"></i> Add a Contact
+        </button>
+    </div>
+
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" style="width:40%">Name</th>
+                <th scope="col" style="width:40%">Title</th>
+                <th scope="col" style="width:20%">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <GenericList Items="Contacts">
+                <EmptyTemplate>
+                    <tr>
+                        <td colspan="3" style="color:red; text-align: center;"><i class="fas fa-exclamation-triangle"></i> You have no contacts for this company.</td>
+                    </tr>
+                </EmptyTemplate>
+                <ElementTemplate Context="contact">
+                    <CompanyContactListRow Contact="contact" @key="contact" OnRowChanged="GetCompanyContactsAsync" />
+                </ElementTemplate>
+            </GenericList>
+        </tbody>
+    </table>
+
+    <Pagination CurrentPage="@PaginatedContacts.CurrentPage"
+                Radius="2"
+                TotalPages="@PaginatedContacts.TotalPages"
+                RecordsPerPage="@PaginatedContacts.RecordsPerPage"
+                TotalRecords="@PaginatedContacts.TotalRecords"
+                OnPageSelected="PageSelected" />
+}
+else
+{
+    <LoadingIndicator />
+}
+
+@code {
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+
+    [Parameter]
+    public Guid CompanyId { get; set; }
+
+    PaginatedResultDTO<CompanyContactDTO> PaginatedContacts { get; set; }
+
+    int CurrentPage { get; set; } = 1;
+
+    CompanyDTO Company { get; set; }
+
+    AddContactDialog AddContactModal { get; set; }
+
+    List<CompanyContactDTO> Contacts { get; set; }
+
+    protected void NavigateToCompanies()
+    {
+        NavigationManager.NavigateTo($"company/all");
+    }
+
+    protected async Task PageSelected(int page)
+    {
+        CurrentPage = page;
+        PaginatedContacts = await CompanyContactDataService.GetCompanyContactsAsync(CompanyId, page);
+        Contacts = PaginatedContacts.Results;
+    }
+
+    protected async Task GetCompanyAsync()
+    {
+        Company = await CompanyDataService.GetCompanyAsync(CompanyId);
+    }
+
+    protected async Task GetCompanyContactsAsync()
+    {
+        await PageSelected(CurrentPage);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await GetCompanyAsync();
+        await GetCompanyContactsAsync();
+    }
+
+    protected void ShowContactDialog()
+    {
+        AddContactModal.Show();
+    }
+}

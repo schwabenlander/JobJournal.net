@@ -1,0 +1,38 @@
+﻿<tr>
+    <td colspan="4">
+        <div class="card">
+            <h3 class="card-header">@Contact.FullName</h3>
+            <div class="card-body">
+                <h5 class="card-title">@Contact.JobTitle</h5>
+                <p class="card-text">
+                    <ul>
+                        <li>
+                            Phone Number: @Contact.PhoneNumber
+                        </li>
+                        <li>
+                            Email Address: <a href="mailto:@Contact.EmailAddress">@Contact.EmailAddress</a>
+                        </li>
+                        <li>
+                            Date of First Contact: @Contact.FirstContactDate?.ToShortDateString()
+                        </li>
+                        <li>
+                            Date of Most Recent Contact: @Contact.MostRecentContactDate?.ToShortDateString()
+                        </li>
+                        <li>
+                            Notes: <br />@Contact.Notes
+                        </li>
+                    </ul>
+                </p>
+                <button type="button" class="btn btn-primary" @onclick="OnHideDetails">Hide Info</button>
+            </div>
+        </div>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public CompanyContactDTO Contact { get; set; }
+
+    [Parameter]
+    public EventCallback OnHideDetails { get; set; }
+}

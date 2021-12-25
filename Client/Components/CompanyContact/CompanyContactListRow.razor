@@ -1,0 +1,54 @@
+﻿@inject NavigationManager NavigationManager
+
+<EditContactDialog @ref="EditModal" Contact="Contact" OnEditContactSaved="ContactUpdated" />
+<DeleteContactDialog @ref="DeleteModal" Contact="Contact" OnContactDeleted="ContactDeleted" />
+
+<tr>
+    <th scope="row">@Contact.FullName</th>
+    <td>@Contact.JobTitle</td>
+    <td>
+        <button type="button" class="btn btn-primary" title="Details" @onclick="NavigateToCompanyContactDetails"><i class="fas fa-info-circle"></i></button>
+        <button type="button" class="btn btn-warning" title="Edit" @onclick="Update"><i class="fas fa-pencil-alt"></i></button>
+        <button type="button" class="btn btn-danger" title="Delete" @onclick="Delete"><i class="fas fa-trash-alt"></i></button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public CompanyContactDTO Contact { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnRowChanged { get; set; }
+
+    EditContactDialog EditModal { get; set; }
+    DeleteContactDialog DeleteModal { get; set; }
+
+    protected void Update()
+    {
+        Console.WriteLine($"Updating contact: {Contact.FullName}");
+        EditModal.Show();
+    }
+
+    protected void Delete()
+    {
+        Console.WriteLine($"Deleting contact: {Contact.FullName}");
+        DeleteModal.Show();
+    }
+
+    public async Task ContactUpdated(CompanyContactDTO contact)
+    {
+        Console.WriteLine($"{contact.FullName} was updated in the database");
+        await OnRowChanged.InvokeAsync(true);
+    }
+
+    public async Task ContactDeleted(CompanyContactDTO contact)
+    {
+        Console.WriteLine($"{contact.FullName} was removed from the database");
+        await OnRowChanged.InvokeAsync(true);
+    }
+
+    protected void NavigateToCompanyContactDetails()
+    {
+        NavigationManager.NavigateTo($"/company/{Contact.CompanyId}/contact/{Contact.Id}");
+    }
+}

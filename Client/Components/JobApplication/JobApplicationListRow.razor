@@ -1,0 +1,98 @@
+﻿@inject NavigationManager NavigationManager
+
+<DeleteJobApplicationDialog @ref="DeleteModal" JobApplication="JobApplication" OnJobApplicationDeleted="JobApplicationDeleted" />
+<EditJobApplicationDialog @ref="EditModal" JobApplication="JobApplication" OnEditJobApplicationSaved="JobApplicationUpdated" />
+
+<tr class="@rowCssClass">
+    <th scope="row">@JobApplication.JobTitle</th>
+    @if (DisplayCompanyName)
+    {
+        <td><a href="/company/@JobApplication.CompanyId">@JobApplication.CompanyName</a></td>
+    }
+    <td>@JobApplication.ApplicationDate.ToShortDateString()</td>
+    <td>
+        @if (JobApplication.ApplicationStatusId == 5)
+        {
+            <i class="fas fa-ghost"></i>
+        }
+        @JobApplication.ApplicationStatus
+    </td>
+    <td>
+        <button type="button" class="btn btn-primary" title="Details" @onclick="NavigateToJobApplicationDetails"><i class="fas fa-info-circle"></i></button>
+        <button type="button" class="btn btn-warning" title="Edit" @onclick="Update"><i class="fas fa-pencil-alt"></i></button>
+        <button type="button" class="btn btn-danger" title="Delete" @onclick="Delete"><i class="fas fa-trash-alt"></i></button>
+    </td>
+</tr>
+
+@code {
+    DeleteJobApplicationDialog DeleteModal { get; set; }
+    EditJobApplicationDialog EditModal { get; set; }
+
+    string rowCssClass = "";
+
+    [Parameter]
+    public JobApplicationDTO JobApplication { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnRowChanged { get; set; }
+
+    [Parameter]
+    public bool DisplayCompanyName { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        switch (JobApplication.ApplicationStatusId)
+        {
+            case 1:
+                rowCssClass = "";
+                break;
+            case 2:
+                rowCssClass = "table-primary";
+                break;
+            case 3:
+                rowCssClass = "table-dark";
+                break;
+            case 4:
+                rowCssClass = "table-danger";
+                break;
+            case 5:
+                rowCssClass = "table-warning";
+                break;
+            case 6:
+                rowCssClass = "table-success";
+                break;
+            default:
+                rowCssClass = "";
+                break;
+        }
+    }
+
+    protected void Update()
+    {
+        Console.WriteLine($"Updating job application: {JobApplication.JobTitle}");
+        EditModal.Show();
+    }
+
+    protected void Delete()
+    {
+        Console.WriteLine($"Deleting job application: {JobApplication.JobTitle}");
+        DeleteModal.Show();
+    }
+
+    public async Task JobApplicationUpdated(JobApplicationDTO jobApplication)
+    {
+        Console.WriteLine($"{jobApplication.JobTitle} was updated in the database");
+        await OnRowChanged.InvokeAsync(true);
+    }
+
+    public async Task JobApplicationDeleted(JobApplicationDTO jobApplication)
+    {
+        Console.WriteLine($"{jobApplication.JobTitle} was removed from the database");
+        await OnRowChanged.InvokeAsync(true);
+    }
+
+    protected void NavigateToJobApplicationDetails()
+    {
+        NavigationManager.NavigateTo($"/company/{JobApplication.CompanyId}/jobapplication/{JobApplication.Id}");
+    }
+}

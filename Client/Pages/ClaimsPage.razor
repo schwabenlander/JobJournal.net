@@ -1,0 +1,23 @@
+﻿@page "/claims"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize]
+
+<h3>User ID GUID</h3>
+
+<code>@principal.FindFirst("oid").Value</code>
+
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; }
+
+    private ClaimsPrincipal principal;
+
+    protected async override Task OnParametersSetAsync()
+    {
+            principal = (await authState).User;
+    }
+}

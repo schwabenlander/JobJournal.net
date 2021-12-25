@@ -1,0 +1,42 @@
+﻿@*
+    Credit to: Felipe Gavilán
+    Source: https://github.com/gavilanch/BlazorMovies
+*@
+
+@typeparam TItem
+
+@if (Items == null)
+{
+    <LoadingIndicator />
+}
+else if (Items.Count == 0)
+{
+    @if (EmptyTemplate != null)
+    {
+        @EmptyTemplate
+    }
+    else
+    {
+        // Default Content
+        <span style="color:red; text-align: center;"><i class="fas fa-exclamation-triangle"></i> There are no records to display.</span>
+    }
+}
+else
+{
+    @foreach (var item in Items)
+    {
+
+        @ElementTemplate(item)
+    }
+}
+
+@code {
+    [Parameter]
+    public RenderFragment EmptyTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> ElementTemplate { get; set; }
+
+    [Parameter]
+    public List<TItem> Items { get; set; }
+}

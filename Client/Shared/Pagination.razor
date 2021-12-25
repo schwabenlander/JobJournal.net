@@ -1,0 +1,112 @@
+﻿@* Source: https://github.com/gavilanch/BlazorMovies/blob/master/ASP.NET%20Core%203.2/Module%206%20-%20HTTP%20and%20Entity%20Framework%20Core/End/BlazorMovies/Client/Shared/Pagination.razor *@
+
+@if (TotalRecords > 0)
+{
+    <p class="text-center">
+        @startRecord-@endRecord of @TotalRecords
+    </p>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            @foreach (var link in links)
+            {
+                <li @onclick="@(() => SelectedPageInternal(link))"
+                    style="cursor: pointer;"
+                    class="page-item @(link.Enabled ? null : "disabled") @(link.Active ? "active" : null)">
+                    <span class="page-link" href="#">@link.Text</span>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+@code {
+    int startRecord = 0, endRecord = 0;
+
+    [Parameter]
+    public int CurrentPage { get; set; }
+
+    [Parameter]
+    public int TotalPages { get; set; }
+
+    [Parameter]
+    public int Radius { get; set; }
+
+    [Parameter]
+    public int RecordsPerPage { get; set; }
+
+    [Parameter]
+    public int TotalRecords { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    List<LinkModel> links;
+
+    private async Task SelectedPageInternal(LinkModel link)
+    {
+        if (link.Page == CurrentPage)
+        {
+            return;
+        }
+
+        if (!link.Enabled)
+        {
+            return;
+        }
+
+        CurrentPage = link.Page;
+        await OnPageSelected.InvokeAsync(link.Page);
+    }
+
+    protected override void OnParametersSet()
+    {
+        LoadPages();
+
+        startRecord = (CurrentPage - 1) * RecordsPerPage + 1;
+        endRecord = (CurrentPage * RecordsPerPage) < TotalRecords ?
+            (CurrentPage * RecordsPerPage) : TotalRecords;
+    }
+
+    private void LoadPages()
+    {
+        links = new List<LinkModel>();
+        var isPreviousPageLinkEnabled = CurrentPage != 1;
+        var previousPage = CurrentPage - 1;
+        links.Add(new LinkModel(previousPage, isPreviousPageLinkEnabled, "<"));
+
+        for (int i = 1; i <= TotalPages; i++)
+        {
+            if (i >= CurrentPage - Radius && i <= CurrentPage + Radius)
+            {
+                links.Add(new LinkModel(i) { Active = CurrentPage == i });
+            }
+        }
+
+        var isNextPageLinkEnabled = CurrentPage != TotalPages;
+        var nextPage = CurrentPage + 1;
+        links.Add(new LinkModel(nextPage, isNextPageLinkEnabled, ">"));
+    }
+
+    class LinkModel
+    {
+        public LinkModel(int page)
+            : this(page, true) { }
+
+        public LinkModel(int page, bool enabled)
+            : this(page, enabled, page.ToString())
+        { }
+
+        public LinkModel(int page, bool enabled, string text)
+        {
+            Page = page;
+            Enabled = enabled;
+            Text = text;
+        }
+
+        public string Text { get; set; }
+        public int Page { get; set; }
+        public bool Enabled { get; set; } = true;
+        public bool Active { get; set; } = false;
+    }
+}

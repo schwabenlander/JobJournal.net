@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\Company\" />
+    <Folder Include="Components\CompanyContact\" />
+    <Folder Include="Components\JobApplication\" />
+    <Folder Include="Services\" />
     <Folder Include="wwwroot\js\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>

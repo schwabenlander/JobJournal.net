@@ -1,0 +1,70 @@
+﻿@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<DeleteCompanyDialog @ref="DeleteModal" Company="Company" OnCompanyDeleted="CompanyDeleted"></DeleteCompanyDialog>
+<EditCompanyDialog @ref="EditModal" Company="Company" OnEditCompanySaved="CompanyUpdated"></EditCompanyDialog>
+
+<tr>
+    <th scope="row">
+        @Company.CompanyName
+    </th>
+    <td>@Company.City, @Company.State</td>
+    <td>
+        <button type="button" class="btn btn-primary" title="Details" @onclick="NavigateToCompanyDetails"><i class="fas fa-info-circle"></i></button>
+        <button type="button" class="btn btn-info" title="Job Applications" @onclick="NavigateToJobApplications"><i class="fas fa-list"></i></button>
+        <button type="button" class="btn btn-success" title="Contacts" @onclick="NavigateToContacts"><i class="fas fa-user"></i></button>
+        <button type="button" class="btn btn-warning" title="Edit" @onclick="Update"><i class="fas fa-pencil-alt"></i></button>
+        <button type="button" class="btn btn-danger" title="Delete" @onclick="Delete"><i class="fas fa-trash-alt"></i></button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public CompanyDTO Company { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnRowChanged { get; set; }
+
+    DeleteCompanyDialog DeleteModal { get; set; }
+
+    EditCompanyDialog EditModal { get; set; }
+
+    protected void NavigateToContacts()
+    {
+        NavigationManager.NavigateTo($"company/{Company.Id}/contacts");
+    }
+
+    protected void NavigateToJobApplications()
+    {
+        NavigationManager.NavigateTo($"company/{Company.Id}/jobapplication/all");
+    }
+
+    protected void NavigateToCompanyDetails()
+    {
+        NavigationManager.NavigateTo($"company/{Company.Id}");
+    }
+
+    protected void Update()
+    {
+        Console.WriteLine($"Updating company: {Company.CompanyName}");
+        EditModal.Show();
+    }
+
+    protected void Delete()
+    {
+        Console.WriteLine($"Deleting company: {Company.CompanyName}");
+        DeleteModal.Show();
+    }
+
+    public async Task CompanyDeleted(CompanyDTO company)
+    {
+        Console.WriteLine($"{company.CompanyName} was removed from the database");
+        await OnRowChanged.InvokeAsync(true);
+    }
+
+    public async Task CompanyUpdated(CompanyDTO company)
+    {
+        Console.WriteLine($"{company.CompanyName} was updated in the database");
+        await OnRowChanged.InvokeAsync(true);
+    }
+}

@@ -1,0 +1,35 @@
+﻿<tr>
+    <td colspan="3">
+        <div class="card">
+            <h3 class="card-header">@Company.CompanyName</h3>
+            <div class="card-body">
+                <h5 class="card-title">@Company.City, @Company.State</h5>
+                <p class="card-text">
+                    <ul>
+                        <li>
+                            Website: <a href="@Company.WebsiteURI" target="_blank">@Company.WebsiteURI</a>
+                        </li>
+                        <li>
+                            Phone Number: @Company.PhoneNumber
+                        </li>
+                        <li>
+                            Email Address: <a href="mailto:@Company.EmailAddress">@Company.EmailAddress</a>
+                        </li>
+                        <li>
+                            Notes: <br />@Company.Notes
+                        </li>
+                    </ul>
+                </p>
+                <button type="button" class="btn btn-primary" @onclick="OnHideDetails">Hide Info</button>
+            </div>
+        </div>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public CompanyDTO Company { get; set; }
+
+    [Parameter]
+    public EventCallback OnHideDetails { get; set; }
+}

@@ -1,0 +1,30 @@
+﻿@page "/company/{CompanyId:guid}/jobapplication/{JobApplicationId:guid}"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize]
+
+<CascadingValue Value="UserId" IsFixed="true">
+    <JobApplicationDetails JobApplicationId="JobApplicationId" />
+</CascadingValue>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; }
+
+    private ClaimsPrincipal principal;
+
+    private Guid UserId { get; set; }
+
+    [Parameter]
+    public Guid CompanyId { get; set; }
+
+    [Parameter]
+    public Guid JobApplicationId { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        principal = (await authState).User;
+        UserId = Guid.Parse(principal.FindFirst("oid").Value);
+    }
+}

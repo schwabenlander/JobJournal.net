@@ -1,0 +1,42 @@
+﻿<ModalDialog @ref="Modal" ModalTitle="Delete Job Application">
+    <ModalContent>
+        <p>Are you sure you want to delete your job application for <strong>@JobApplication.JobTitle</strong> at <strong>@JobApplication.CompanyName</strong>?</p>
+        <p class="text-danger">
+            <strong><i class="fas fa-exclamation-triangle"></i> WARNING: </strong>You cannot undo this action!
+        </p>
+    </ModalContent>
+    <ModalFooter>
+        <button type="button" class="btn btn-danger" @onclick="HandleDelete">DELETE</button>
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="Modal.Hide">Cancel</button>
+    </ModalFooter>
+</ModalDialog>
+
+@code {
+    [Parameter]
+    public JobApplicationDTO JobApplication { get; set; }
+
+    [Parameter]
+    public EventCallback<JobApplicationDTO> OnJobApplicationDeleted { get; set; }
+
+    [Inject]
+    public IJobApplicationDataService JobApplicationDataService { get; set; }
+
+    ModalDialog Modal { get; set; }
+
+    public async Task Hide()
+    {
+        await Modal.Hide();
+    }
+
+    public void Show()
+    {
+        Modal.Show();
+    }
+
+    protected async Task HandleDelete()
+    {
+        await JobApplicationDataService.DeleteJobApplicationAsync(JobApplication.Id);
+        await Hide();
+        await OnJobApplicationDeleted.InvokeAsync(JobApplication);
+    }
+}

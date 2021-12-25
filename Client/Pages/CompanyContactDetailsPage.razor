@@ -1,0 +1,31 @@
+﻿@page "/company/{CompanyId:guid}/contact/{ContactId:guid}"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+    <CascadingValue Value="UserId" IsFixed="true">
+        <CompanyContactDetails CompanyId="CompanyId" ContactId="ContactId" />
+    </CascadingValue>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; }
+
+    private ClaimsPrincipal principal;
+
+    [Parameter]
+    public Guid CompanyId { get; set; }
+
+    [Parameter]
+    public Guid ContactId { get; set; }
+
+    private Guid UserId { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        principal = (await authState).User;
+        UserId = Guid.Parse(principal.FindFirst("oid").Value);
+    }
+}

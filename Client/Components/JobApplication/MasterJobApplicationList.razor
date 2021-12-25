@@ -1,0 +1,120 @@
+﻿@inject IJobApplicationDataService JobApplicationDataService
+@inject ICompanyDataService CompanyDataService
+@inject NavigationManager NavigationManager
+
+@if (JobApplications != null)
+{
+    <h1>Job Applications</h1>
+
+    @if (companyCount > 0)
+    {
+        <AddJobApplicationDialog @ref="AddJobApplicationDialog" OnNewJobApplicationSaved="NewJobApplicationAdded" />
+
+        <div style="padding-bottom: 10px;">
+            <button type="button" class="btn btn-primary" @onclick="ShowAddJobApplicationModal">
+                <i class="fas fa-plus"></i> Add a Job Application
+            </button>
+            <button type="button" class="btn btn-outline-primary" @onclick="DownloadCsv">
+                <i class="fas fa-cloud-download-alt"></i> Download as CSV
+            </button>
+        </div>
+    }
+
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" style="width:30%">Job Title</th>
+                <th scope="col" style="width:20%">Company</th>
+                <th scope="col" style="width:13%">Application Date</th>
+                <th scope="col" style="width:12%">Status</th>
+                <th scope="col" style="width:25%">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <GenericList Items="JobApplications">
+                <EmptyTemplate>
+                    <tr>
+                        <td colspan="5" style="color:red; text-align: center;"><i class="fas fa-exclamation-triangle"></i> You have no job applications.</td>
+                    </tr>
+                </EmptyTemplate>
+                <ElementTemplate Context="application">
+                    <JobApplicationListRow JobApplication="application" DisplayCompanyName="true" @key="application" OnRowChanged="JobApplicationUpdated" />
+                </ElementTemplate>
+            </GenericList>
+        </tbody>
+    </table>
+
+    <Pagination CurrentPage="@PaginatedJobApplications.CurrentPage" 
+                Radius="2" 
+                TotalPages="@PaginatedJobApplications.TotalPages" 
+                RecordsPerPage="@PaginatedJobApplications.RecordsPerPage" 
+                TotalRecords="@PaginatedJobApplications.TotalRecords" 
+                OnPageSelected="PageSelected" />
+}
+else
+{
+    <LoadingIndicator />
+}
+
+@code {
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+
+    public PaginatedResultDTO<JobApplicationDTO> PaginatedJobApplications { get; set; }
+
+    public List<JobApplicationDTO> JobApplications { get; set; }
+
+    AddJobApplicationDialog AddJobApplicationDialog { get; set; }
+
+    int CurrentPage { get; set; } = 1;
+
+    bool showAddJobButton { get; set; } = false;
+    int companyCount;
+
+    public async Task GetJobApplicationsAsync()
+    {
+        await PageSelected(CurrentPage);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        companyCount = await CompanyDataService.GetCompanyCountForUserAsync(UserId);
+        await GetJobApplicationsAsync();
+    }
+
+    protected async Task NewJobApplicationAdded(JobApplicationDTO jobApplication)
+    {
+        Console.WriteLine($"New job application ({jobApplication.JobTitle}) was added to the database");
+        await GetJobApplicationsAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task JobApplicationUpdated()
+    {
+        await GetJobApplicationsAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task PageSelected(int page)
+    {
+        CurrentPage = page;
+        PaginatedJobApplications = await JobApplicationDataService.GetJobApplicationsAsync(UserId, page);
+        JobApplications = PaginatedJobApplications.Results;
+    }
+
+    protected void ShowAddJobApplicationModal()
+    {
+        AddJobApplicationDialog.Show();
+    }
+
+    protected void NavigateBackToCompanies()
+    {
+        NavigationManager.NavigateTo($"company/all");
+    }
+
+    protected void DownloadCsv()
+    {
+        Console.WriteLine("Downloading CSV...");
+        NavigationManager.NavigateTo($"api/jobapplication/user/{UserId}/csv");
+    }
+}

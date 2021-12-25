@@ -1,0 +1,92 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject ICompanyDataService CompanyDataService
+@inject NavigationManager NavigationManager
+
+<AddCompanyDialog @ref="AddCompanyModal" OnNewCompanySaved="NewCompanyAdded"></AddCompanyDialog>
+
+@if (companies != null)
+{
+    <h1>Companies</h1>
+
+    <div style="padding-bottom: 10px;">
+        <button type="button" class="btn btn-primary" @onclick="ShowAddCompanyModal">
+            <i class="fas fa-plus"></i> Add a Company
+        </button>
+    </div>
+
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" style="width:40%">Company</th>
+                <th scope="col" style="width:30%">Location</th>
+                <th scope="col" style="width:30%">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <GenericList Items="companies">
+                <EmptyTemplate>
+                    <tr>
+                        <td colspan="3" style="color:red; text-align: center;"><i class="fas fa-exclamation-triangle"></i> You have no companies in your profile.</td>
+                    </tr>
+                </EmptyTemplate>
+                <ElementTemplate Context="company">
+                    <CompanyListRow Company="company" @key="company" OnRowChanged="GetCompaniesAsync" />
+                </ElementTemplate>
+            </GenericList>
+        </tbody>
+    </table>
+
+    <Pagination CurrentPage="@PaginatedCompanies.CurrentPage"
+                Radius="2"
+                TotalPages="@PaginatedCompanies.TotalPages"
+                RecordsPerPage="@PaginatedCompanies.RecordsPerPage"
+                TotalRecords="@PaginatedCompanies.TotalRecords"
+                OnPageSelected="PageSelected" />
+}
+else
+{
+    <LoadingIndicator />
+}
+
+@code {
+    List<CompanyDTO> companies;
+
+    int CurrentPage { get; set; } = 1;
+
+    PaginatedResultDTO<CompanyDTO> PaginatedCompanies { get; set; }
+
+    AddCompanyDialog AddCompanyModal { get; set; }
+
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+
+    protected async Task PageSelected(int page)
+    {
+        CurrentPage = page;
+        PaginatedCompanies = await CompanyDataService.GetCompaniesAsync(UserId, page);
+        companies = PaginatedCompanies.Results;
+    }
+
+    protected async Task GetCompaniesAsync()
+    {
+        await PageSelected(CurrentPage);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCompaniesAsync();
+    }
+
+    protected async Task NewCompanyAdded(CompanyDTO company)
+    {
+        Console.WriteLine($"New company ({company.CompanyName}) was added to the database");
+        await GetCompaniesAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected void ShowAddCompanyModal()
+    {
+        AddCompanyModal.Show();
+    }
+}

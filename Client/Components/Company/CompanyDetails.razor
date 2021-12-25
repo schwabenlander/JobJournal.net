@@ -1,0 +1,160 @@
+﻿@using System.Text.RegularExpressions;
+@inject NavigationManager NavigationManager
+
+@if (Company != null)
+{
+    <EditCompanyDialog @ref="EditModal" Company="Company" OnEditCompanySaved="CompanyUpdated" />
+    <DeleteCompanyDialog @ref="DeleteModal" Company="Company" OnCompanyDeleted="CompanyDeleted" />
+
+    <h1>@Company.CompanyName</h1>
+    <h3>@Company.City, @Company.State</h3>
+    <button type="button" class="btn btn-secondary" onclick="javascript:history.go(-1)">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+    <button type="button" class="btn btn-info" @onclick="NavigateToJobApplications"><i class="fas fa-list"></i> Job Applications</button>
+    <button type="button" class="btn btn-success" @onclick="NavigateToContacts"><i class="fas fa-user"></i> Contacts</button>
+    <button type="button" class="btn btn-primary" @onclick="Update"><i class="fas fa-pencil-alt"></i> Edit</button>
+    <button type="button" class="btn btn-danger" @onclick="Delete"><i class="fas fa-trash-alt"></i> Delete</button>
+
+    <hr />
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Website:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (String.IsNullOrEmpty(Company.WebsiteURI))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    <a href="@Company.WebsiteURI" target="_blank">@Company.WebsiteURI</a>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Telephone Number:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (String.IsNullOrEmpty(Company.PhoneNumber))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    <a href="tel:@GetTelephoneDigits(Company.PhoneNumber)">@Company.PhoneNumber</a>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Email Address:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (String.IsNullOrEmpty(Company.EmailAddress))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    <a href="mailto:@Company.EmailAddress">@Company.EmailAddress</a>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Notes:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (String.IsNullOrEmpty(Company.Notes))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    @Company.Notes
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <LoadingIndicator />
+}
+
+@code {
+    [Inject]
+    public ICompanyDataService CompanyDataService { get; set; }
+
+    private Guid UserId { get; set; }
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    CompanyDTO Company { get; set; }
+
+    EditCompanyDialog EditModal { get; set; }
+    DeleteCompanyDialog DeleteModal { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await GetCompany();
+    }
+
+    protected async Task GetCompany()
+    {
+        Company = await CompanyDataService.GetCompanyAsync(Id);
+    }
+
+    protected void Update()
+    {
+        Console.WriteLine($"Updating company: {Company.CompanyName}");
+        EditModal.Show();
+    }
+
+    protected void Delete()
+    {
+        Console.WriteLine($"Deleting company: {Company.CompanyName}");
+        DeleteModal.Show();
+    }
+
+    public async Task CompanyUpdated(CompanyDTO company)
+    {
+        Console.WriteLine($"{company.CompanyName} was updated in the database");
+        await GetCompany();
+    }
+
+    public void CompanyDeleted(CompanyDTO company)
+    {
+        Console.WriteLine($"{company.CompanyName} was removed from the database");
+        NavigateBackToCompanies();
+    }
+
+    protected void NavigateBackToCompanies()
+    {
+        NavigationManager.NavigateTo($"/company/all");
+    }
+
+    protected void NavigateToContacts()
+    {
+        NavigationManager.NavigateTo($"company/{Company.Id}/contacts");
+    }
+
+    protected void NavigateToJobApplications()
+    {
+        NavigationManager.NavigateTo($"company/{Company.Id}/jobapplication/all");
+    }
+
+    string GetTelephoneDigits(string phoneNumber)
+    {
+        // Source: https://kaliko.com/blog/c-remove-all-non-numeric-characters/
+        return Regex.Replace(phoneNumber, "[^.0-9]", "");
+    }
+}

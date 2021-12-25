@@ -1,0 +1,54 @@
+﻿@if (isVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block" id="modalDialog" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><strong>@ModalTitle</strong></h5>
+                    <button type="button" class="close" @onclick="Hide" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @ModalContent
+                </div>
+                @if (ModalFooter != null)
+                {
+                    <div class="modal-footer">
+                        @ModalFooter
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string ModalTitle { get; set; }
+
+    [Parameter]
+    public RenderFragment ModalContent { get; set; }
+
+    [Parameter]
+    public RenderFragment ModalFooter { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnDialogClosed { get; set; }
+
+    bool isVisible { get; set; }
+
+    public void Show()
+    {
+        isVisible = true;
+        StateHasChanged();
+    }
+
+    public async Task Hide()
+    {
+        isVisible = false;
+        await OnDialogClosed.InvokeAsync(true);
+        StateHasChanged();
+    }
+}

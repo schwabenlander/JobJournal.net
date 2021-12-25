@@ -1,0 +1,40 @@
+﻿@inject ICompanyDataService CompanyDataService
+@inject IJobApplicationDataService JobApplicationDataService
+
+@if (isLoading)
+{
+    <p><LoadingIndicator /></p>
+}
+else
+{
+<p class="lead">
+    You have applied for <strong>@JobApplicationCount</strong>
+    @(JobApplicationCount == 1 ? "job" : "jobs") at <strong>@CompanyCount</strong> @(CompanyCount == 1 ? "company" : "companies").
+    @if (JobApplicationCount > 0)
+    {
+        <text>Keep up the good work!</text>
+    }
+    else
+    {
+        <text>Let's get started!</text>
+    }
+</p>
+}
+
+@code {
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+
+    bool isLoading = true;
+
+    int JobApplicationCount { get; set; }
+
+    int CompanyCount { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        JobApplicationCount = await JobApplicationDataService.GetJobApplicationCountForUserAsync(UserId);
+        CompanyCount = await CompanyDataService.GetCompanyCountForUserAsync(UserId);
+        isLoading = false;
+    }
+}

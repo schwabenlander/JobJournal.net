@@ -1,0 +1,109 @@
+﻿@inject IJobApplicationDataService JobApplicationDataService
+@inject ICompanyDataService CompanyDataService
+@inject NavigationManager NavigationManager
+
+@if (JobApplications != null)
+{
+    <AddJobApplicationDialog @ref="AddJobApplicationDialog" CompanyId="CompanyId" OnNewJobApplicationSaved="NewJobApplicationAdded" />
+
+    <h1><a href="/company/@Company.Id">@Company.CompanyName</a> Job Applications</h1>
+
+    <div style="padding-bottom: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="javascript:history.go(-1)">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+
+        <button type="button" class="btn btn-primary" @onclick="ShowAddJobApplicationModal">
+            <i class="fas fa-plus"></i> Add a Job Application
+        </button>
+    </div>
+
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" style="width:40%">Job Title</th>
+                <th scope="col" style="width:20%">Application Date</th>
+                <th scope="col" style="width:15%">Status</th>
+                <th scope="col" style="width:25%">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <GenericList Items="JobApplications">
+                <EmptyTemplate>
+                    <tr>
+                        <td colspan="4" style="color:red; text-align: center;"><i class="fas fa-exclamation-triangle"></i> You have no job applications for @Company.CompanyName.</td>
+                    </tr>
+                </EmptyTemplate>
+                <ElementTemplate Context="application">
+                    <JobApplicationListRow JobApplication="application" @key="application" OnRowChanged="OnInitializedAsync" />
+                </ElementTemplate>
+            </GenericList>
+        </tbody>
+    </table>
+
+    <Pagination CurrentPage="@PaginatedJobApplications.CurrentPage"
+                Radius="2"
+                TotalPages="@PaginatedJobApplications.TotalPages"
+                RecordsPerPage="@PaginatedJobApplications.RecordsPerPage"
+                TotalRecords="@PaginatedJobApplications.TotalRecords"
+                OnPageSelected="PageSelected" />
+}
+else
+{
+    <LoadingIndicator />
+}
+
+@code {
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+
+    [Parameter]
+    public Guid CompanyId { get; set; }
+
+    CompanyDTO Company { get; set; }
+
+    public PaginatedResultDTO<JobApplicationDTO> PaginatedJobApplications { get; set; }
+
+    public List<JobApplicationDTO> JobApplications { get; set; }
+
+    AddJobApplicationDialog AddJobApplicationDialog { get; set; }
+
+    int CurrentPage { get; set; } = 1;
+
+    bool showAddJobButton { get; set; } = false;
+
+    public async Task GetJobApplicationsAsync()
+    {
+        await PageSelected(CurrentPage);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Company = await CompanyDataService.GetCompanyAsync(CompanyId);
+        await GetJobApplicationsAsync();
+    }
+
+    protected async Task PageSelected(int page)
+    {
+        CurrentPage = page;
+        PaginatedJobApplications = await JobApplicationDataService.GetJobApplicationsByCompanyAsync(CompanyId, page);
+        JobApplications = PaginatedJobApplications.Results;
+    }
+
+    protected async Task NewJobApplicationAdded(JobApplicationDTO jobApplication)
+    {
+        Console.WriteLine($"New job application ({jobApplication.JobTitle}) was added to the database");
+        await GetJobApplicationsAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected void ShowAddJobApplicationModal()
+    {
+        AddJobApplicationDialog.Show();
+    }
+
+    protected void NavigateBackToCompanies()
+    {
+        NavigationManager.NavigateTo($"company/all");
+    }
+}

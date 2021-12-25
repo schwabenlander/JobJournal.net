@@ -1,0 +1,170 @@
+﻿@inject NavigationManager NavigationManager
+
+@if (CompanyContact != null)
+{
+    <EditContactDialog @ref="EditModal" Contact="CompanyContact" OnEditContactSaved="ContactUpdated" />
+    <DeleteContactDialog @ref="DeleteModal" Contact="CompanyContact" OnContactDeleted="ContactDeleted" />
+
+    <h1>@CompanyContact.FullName</h1>
+    <h3><a href="/company/@CompanyContact.CompanyId">@CompanyContact.CompanyName</a></h3>
+
+    <button type="button" class="btn btn-secondary" onclick="javascript:history.go(-1)">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+    <button class="btn btn-primary" @onclick="Update"><i class="fas fa-pencil-alt"></i> Edit</button>
+    <button class="btn btn-danger" @onclick="Delete"><i class="fas fa-trash-alt"></i> Delete</button>
+
+    <hr />
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Job Title:</strong>
+            </div>
+            <div class="col-lg-10">
+                @CompanyContact.JobTitle
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Email Address:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (string.IsNullOrEmpty(CompanyContact.EmailAddress))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    <a href="mailto:@CompanyContact.EmailAddress">@CompanyContact.EmailAddress</a>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Telephone Number:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (string.IsNullOrEmpty(CompanyContact.PhoneNumber))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    <a href="tel:@Helpers.GetTelephoneDigits(CompanyContact.PhoneNumber)">@CompanyContact.PhoneNumber</a>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>First Contact:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (CompanyContact.FirstContactDate == null)
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    @CompanyContact.FirstContactDate?.ToShortDateString()
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Most Recent Contact:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (CompanyContact.MostRecentContactDate == null)
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    @CompanyContact.MostRecentContactDate?.ToShortDateString()
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2">
+                <strong>Notes:</strong>
+            </div>
+            <div class="col-lg-10">
+                @if (string.IsNullOrEmpty(CompanyContact.Notes))
+                {
+                    <text>N/A</text>
+                }
+                else
+                {
+                    @CompanyContact.Notes
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <LoadingIndicator />
+}
+
+@code {
+    [Inject]
+    public ICompanyContactDataService ContactDataService { get; set; }
+
+    private Guid UserId { get; set; }
+
+    [Parameter]
+    public Guid CompanyId { get; set; }
+
+    [Parameter]
+    public Guid ContactId { get; set; }
+
+    CompanyContactDTO CompanyContact { get; set; }
+
+    EditContactDialog EditModal { get; set; }
+    DeleteContactDialog DeleteModal { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await GetCompanyContact();
+    }
+
+    protected async Task GetCompanyContact()
+    {
+        CompanyContact = await ContactDataService.GetCompanyContactAsync(ContactId);
+    }
+
+    protected void Update()
+    {
+        Console.WriteLine($"Updating contact: {CompanyContact.FullName}");
+        EditModal.Show();
+    }
+
+    protected void Delete()
+    {
+        Console.WriteLine($"Deleting contact: {CompanyContact.FullName}");
+        DeleteModal.Show();
+    }
+
+    public async Task ContactUpdated(CompanyContactDTO contact)
+    {
+        Console.WriteLine($"{contact.FullName} was updated in the database");
+        await GetCompanyContact();
+    }
+
+    public void ContactDeleted(CompanyContactDTO contact)
+    {
+        Console.WriteLine($"{contact.FullName} was removed from the database");
+        NavigateToCompanyContacts();
+    }
+
+    protected void NavigateToCompanyContacts()
+    {
+        NavigationManager.NavigateTo($"/company/{CompanyId}/contacts");
+    }
+}
