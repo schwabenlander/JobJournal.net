@@ -34,8 +34,8 @@ namespace JobJournal.Shared
         [Required]
         public int ApplicationMethodId { get; set; }
 
-        public string OtherApplicationMethod { get; set; }
+        public string? OtherApplicationMethod { get; set; }
 
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
 }
