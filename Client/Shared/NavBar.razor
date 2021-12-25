@@ -30,7 +30,8 @@
 							<i class="bi bi-person-circle"></i> @context.User.Identity?.Name
 						</button>
 						<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-							<li><a class="dropdown-item" href="#" @onclick="@BeginLogout" @onclick:preventDefault >Sign out</a></li>
+							@*<li><a class="dropdown-item" href="#" @onclick="NavigateToProfile" @onclick:preventDefault >Profile</a></li>*@
+							<li><a class="dropdown-item" href="#" @onclick="BeginLogout" @onclick:preventDefault >Sign out</a></li>
 						</ul>
 					</div>
 				</div>
@@ -58,5 +59,10 @@
 	private void NavigateToLogin(MouseEventArgs args)
 	{
 		Navigation.NavigateTo("authentication/login");
+	}
+
+	public void NavigateToProfile(MouseEventArgs args)
+	{
+		// TODO
 	}
 }
