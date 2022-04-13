@@ -20,6 +20,12 @@ namespace JobJournal.Client.Services
 
         Task<int> GetJobApplicationCountForUserAsync(Guid userId);
 
+        Task<int> GetJobApplicationCountForUserTodayAsync(Guid userId);
+
+        Task<int> GetJobApplicationCountForUserPast7DaysAsync(Guid userId);
+
+        Task<int> GetJobApplicationCountForUserPast30DaysAsync(Guid userId);
+
         Task<JobApplicationDTO> AddJobApplicationAsync(JobApplicationDTO jobApplication);
 
         Task UpdateJobApplicationAsync(JobApplicationDTO jobApplication);

@@ -1,0 +1,12 @@
+﻿@inject IJobApplicationDataService JobApplicationDataService
+@inject ICompanyDataService CompanyDataService
+@inject NavigationManager NavigationManager
+
+<h1>Dashboard</h1>
+
+
+
+@code {
+    [CascadingParameter]
+    public Guid UserId { get; set; }
+}

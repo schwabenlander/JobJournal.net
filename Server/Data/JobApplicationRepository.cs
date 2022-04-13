@@ -80,5 +80,23 @@ namespace JobJournal.Server.Data
         {
             return await _db.JobApplications.CountAsync(j => j.UserId == userId);
         }
+
+        public async Task<int> GetJobApplicationCountForUserToday(Guid userId)
+        {
+            return await _db.JobApplications.CountAsync(j => j.UserId == userId &&
+                j.ApplicationDate.Date == DateTime.Now.Date);
+        }
+
+        public async Task<int> GetJobApplicationCountForUserPast7Days(Guid userId)
+        {
+            return await _db.JobApplications.CountAsync(j => j.UserId == userId &&
+                j.ApplicationDate.Date >= DateTime.Now.Date.AddDays(-7));
+        }
+
+        public async Task<int> GetJobApplicationCountForUserPast30Days(Guid userId)
+        {
+            return await _db.JobApplications.CountAsync(j => j.UserId == userId &&
+                j.ApplicationDate.Date >= DateTime.Now.Date.AddDays(-30));
+        }
     }
 }

@@ -15,5 +15,8 @@ namespace JobJournal.Server.Data
         Task<JobApplication> UpdateJobApplication(JobApplication application);
         Task DeleteJobApplication(Guid applicationId);
         Task<int> GetJobApplicationCountForUser(Guid userId);
+        Task<int> GetJobApplicationCountForUserToday(Guid userId);
+        Task<int> GetJobApplicationCountForUserPast7Days(Guid userId);
+        Task<int> GetJobApplicationCountForUserPast30Days(Guid userId);
     }
 }

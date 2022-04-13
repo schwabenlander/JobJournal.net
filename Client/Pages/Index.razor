@@ -7,6 +7,10 @@
         <PageTitle>@context.User.Identity?.Name's JobJournal</PageTitle>
         <h1 class="mb-4">Hello, @context.User.Identity?.Name!</h1>
 
+        <pre>@context.User.Claims.SingleOrDefault(c => c.Type == "oid").Value</pre>
+
+        <p></p>
+
         <table class="table">
             <thead>
                 <tr>

@@ -32,6 +32,62 @@ namespace JobJournal.Server.Controllers
         }
 
         [HttpGet("user/{userId:Guid}/count")]
+        public async Task<ActionResult<int>> GetApplicationCountForUser(Guid userId)
+        {
+            try
+            {
+                return Ok(await _repository.GetJobApplicationCountForUser(userId));
+            }
+            catch
+            {
+                // TODO: Log exception
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("user/{userId:Guid}/count/today")]
+        public async Task<ActionResult<int>> GetApplicationCountForUserToday(Guid userId)
+        {
+            try
+            {
+                return Ok(await _repository.GetJobApplicationCountForUserToday(userId));
+            }
+            catch
+            {
+                // TODO: Log exception
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("user/{userId:Guid}/count/week")]
+        public async Task<ActionResult<int>> GetApplicationCountForUserPast7Days(Guid userId)
+        {
+            try
+            {
+                return Ok(await _repository.GetJobApplicationCountForUserPast7Days(userId));
+            }
+            catch
+            {
+                // TODO: Log exception
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("user/{userId:Guid}/count/month")]
+        public async Task<ActionResult<int>> GetApplicationCountForUserPast30Days(Guid userId)
+        {
+            try
+            {
+                return Ok(await _repository.GetJobApplicationCountForUserPast30Days(userId));
+            }
+            catch
+            {
+                // TODO: Log exception
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("user/{userId:Guid}/companies/count")]
         public async Task<ActionResult<int>> GetCompanyCountForUser(Guid userId)
         {
             try
